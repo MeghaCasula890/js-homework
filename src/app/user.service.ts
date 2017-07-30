@@ -1,32 +1,84 @@
+import { Http, Headers, Response, RequestOptions } from '@angular/http';
+import { Observable } from 'rxjs/Observable';
+import 'rxjs/add/operator/catch';
+import 'rxjs/add/operator/map';
+import 'rxjs/add/observable/of';
+import 'rxjs/add/observable/throw';
+
+
 import { Injectable } from '@angular/core';
 
-import { User } from './user';
+
+import { User } from './models/index';
+
 
 @Injectable()
 export class UserService {
+    users: Array<{ firstName, lastName, username,password }> = [
+        {
+            firstName: "Demo",
+            lastName: "User",
+            username: "user",
+            password: "123456"
+        }
+    ];
+    constructor(private http: Http) {
+        if (localStorage.getItem('users')) {
+            this.users = JSON.parse(localStorage.getItem('users'));
+        }
+    }
 
-  users: User[] = [];
+    getAll() {
+        return this.http.get('/api/users', this.jwt()).map((response: Response) => response.json());
+    }
 
-  private serverResponse = '{ "email": [ "can\'t be blank" ], "first_name": [ "can\'t be blank" ], "last_name": [ "can\'t be blank" ] }'; 
-  private userDictionary = { 
-    1: '{ "id": 1, "buyer_id": 1, "first_name": "Fred", "last_name": "Flintstone", "email": "fred.flintstone@slaterockandgravel.com" }',
-    2: '{ "id": 2, "buyer_id": 2, "first_name": "Barney", "last_name": "Rubble", "email": "barney.rubble@slaterockandgravel.com" }',
-    3: '{ "id": 3, "buyer_id": 3, "first_name": "Wilma", "last_name": "Flintstone", "email": "wilma.flinstone@dailygranite.com" }'
-  };
+    getById(id: number) {
+        return this.http.get('/api/users/' + id, this.jwt()).map((response: Response) => response.json());
+    }
 
-  constructor() { }
+    create(user: User) {
+        return this.http.post('/api/users', user, this.jwt()).map((response: Response) => response.json());
+    }
+
+    update(user: User) {
+        return this.http.put('/api/users/' + user.id, user, this.jwt()).map((response: Response) => response.json());
+    }
+
+    delete(id: number) {
+        return this.http.delete('/api/users/' + id, this.jwt()).map((response: Response) => response.json());
+    }
+
+    // private helper methods
+
+    private jwt() {
+        // create authorization header with jwt token
+        let currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        if (currentUser && currentUser.token) {
+            let headers = new Headers({ 'Authorization': 'Bearer ' + currentUser.token });
+            return new RequestOptions({ headers: headers });
+        }
+    }
+    loginUser(loginUser){
+        for(let user of this.users){
+            if(loginUser.username == user.username ){
+                if(loginUser.password == user.password){
+                    return Observable.of({msg:"SuccessFully Login",user:user});
+                }
+                else{
+                   return Observable.throw(new Error("Password Not Match"));
+                }
+            }
+        }
+        return Observable.throw(new Error("User Not Registered"));
+    }
+    registerUser(newUser){
+        this.users.push(newUser);
+        localStorage.setItem('users',JSON.stringify(this.users));
+        return Observable.of({msg:"SuccessFully Registered"})
+    }
 
 
-  getUsers() {
-   this.users = JSON.parse("["+Object.keys(this.userDictionary).map(key => this.userDictionary[key]).join(',')+"]");
-  }
 
-  getUser(id: number) {
-    return JSON.parse(this.userDictionary[id]);
-  }
 
-  private logError(error: any) {
-    console.error('service found an error: '+error);
-  }
 
 }
