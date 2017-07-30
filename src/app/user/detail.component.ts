@@ -1,25 +1,47 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Params } from '@angular/router';
-import { User } from '../user';
+import { Router } from '@angular/router';
+import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { UserService } from '../user.service';
-
-import 'rxjs/add/operator/switchMap';
+import { FlashMessagesService } from 'angular2-flash-messages';
 
 
 @Component({
-  selector: 'app-detail',
-  templateUrl: './detail.component.html',
-  styleUrls: ['./detail.component.css'],
-  providers: [ UserService ]
+    selector: 'app-register-user',
+    templateUrl: './register-user.component.html',
+    styleUrls: ['./register-user.component.css']
 })
-export class UserDetailComponent implements OnInit {
+export class RegisterUserComponent implements OnInit {
+    registerForm: FormGroup;
+    ngOnInit() {
+    }
+    model: any = {};
+    loading = false;
 
-  user: User;
-  constructor(private userService: UserService, private route: ActivatedRoute) { }
+    constructor(
+        private router: Router,
+        private userService: UserService,
+        private flashMsg: FlashMessagesService
+    ) { 
+        this.registerForm = new FormGroup({
+            firstName: new FormControl(null, Validators.required),
+            lastName: new FormControl(null, Validators.required),
+            username: new FormControl(null, Validators.required),
+            password: new FormControl(null, Validators.required)
+        });
+    }
 
-  ngOnInit() {
-    let id = +this.route.snapshot.params['id'];
-    this.user = this.userService.getUser(id);
-  }
-
+    register(form) {
+        this.loading = true;
+        this.userService.registerUser(form)
+            .subscribe(
+            data => {
+                this.flashMsg.show(data.msg , { cssClass: 'text-success', timeout: 3000 });
+                console.log(data);
+                this.router.navigate(['/login']);
+            },
+            error => {
+                this.flashMsg.show(error , { cssClass: 'text-danger', timeout: 3000 });
+                this.loading = false;
+            });
+    }
 }
