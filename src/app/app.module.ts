@@ -1,45 +1,31 @@
-import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { FormsModule } from '@angular/forms';
+import { NgModule } from '@angular/core';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
-import { RouterModule, Routes } from '@angular/router';
+import { AppRoutingModule } from './app.routing.module';
 
-
-// Material Design
-import { MdCardModule, MdGridListModule, MdIconModule, MdToolbarModule, MdButtonModule } from '@angular/material';
-import { MdInputModule } from '@angular/material';
-import {NoopAnimationsModule} from '@angular/platform-browser/animations';
-
+import { UserService } from './user.service';
+import { FlashMessagesModule } from 'angular2-flash-messages';
 
 import { AppComponent } from './app.component';
-import { UserInfoComponent } from './user-info/user-info.component';
-import { DashboardComponent } from './dashboard/dashboard.component';
-import { AppRoutingModule } from './app-routing.module';
-import { LogoutComponent } from './account/logout.component';
-import { UserDetailComponent } from './user/detail.component';
+
+import { RegisterUserComponent } from './register-user/register-user.component';
+import { LoginComponent } from './login/login.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    DashboardComponent,
-    UserInfoComponent,
-    LogoutComponent,
-    UserDetailComponent
+    RegisterUserComponent,
+    LoginComponent
   ],
   imports: [
-    AppRoutingModule,
     BrowserModule,
     FormsModule,
     HttpModule,
-    MdButtonModule,
-    MdCardModule,
-    MdGridListModule,
-    MdIconModule,
-    MdInputModule,
-    MdToolbarModule,
-    NoopAnimationsModule
+    AppRoutingModule,
+    ReactiveFormsModule,FlashMessagesModule
   ],
-  providers: [],
+  providers: [UserService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
